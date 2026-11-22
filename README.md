@@ -1,48 +1,58 @@
-# mend — one patch tool for every AI edit format
+# mend — every AI patch format, one tool
 
 [![make.fun bounty](https://make.fun/badge/hidden-spec-cli-01-run-20261122.svg)](https://make.fun/bounty/hidden-spec-cli-01-run-20261122)
 [![rank](https://make.fun/badge/hidden-spec-cli-01-run-20261122/heruruben-hub/mend-cli/rank.svg)](https://make.fun/bounty/hidden-spec-cli-01-run-20261122)
 [![reward](https://make.fun/badge/hidden-spec-cli-01-run-20261122/heruruben-hub/mend-cli/reward.svg)](https://make.fun/bounty/hidden-spec-cli-01-run-20261122)
 
-Entry for the make.fun bounty [Build mend, one patch tool for every AI edit format](https://make.fun/bounty/hidden-spec-cli-01-run-20261122) (hidden-spec-cli-01-run-20261122).
+My entry for the make.fun bounty [Build mend, one patch tool for every AI edit format](https://make.fun/bounty/hidden-spec-cli-01-run-20261122) (hidden-spec-cli-01-run-20261122).
 
-**mend** is a command-line tool that applies the edits AI models write to a tree of files. It reads a patch in any of
-the four formats models actually produce — unified diffs, SEARCH/REPLACE blocks, V4A patches (`*** Begin Patch` …
-`*** End Patch`) and JSON edit objects — works out which format it is holding, finds the named lines even when their
-line numbers are wrong or their whitespace and indentation have drifted (three matching tiers: exact, trailing
-whitespace ignored, leading whitespace ignored too, with re-indentation at the loosest tier), and then writes every
-change or none of them. It prints one row per changed file (`A`, `D`, `M`, or `R <old> -> <new>` for a move) and a
-final `ok: n files` line; a patch that cannot be applied in full writes nothing and reports each failed edit.
+AI models describe code changes in whichever format they feel like, and **mend** takes all of them. Hand it a
+unified diff, a SEARCH/REPLACE block, a V4A patch (`*** Begin Patch` … `*** End Patch`) or a JSON list of edit
+objects, and it works out the format for itself, applies the edits to the file tree in the current directory, and
+reports what changed. Finding the target lines does not depend on the patch's line numbers being right: matching
+runs through three tiers of increasing looseness — exact, then ignoring trailing whitespace, then ignoring
+indentation as well, re-indenting the replacement lines to match the file at that loosest tier. Application is
+all-or-nothing: if any edit in the patch fails, no file is touched, and each failure is reported with its reason.
 
-The full contract is in [`SPEC.md`](SPEC.md).
+For every file whose state changed, mend prints one row — `A` for added, `D` for deleted, `M` for modified, and
+`R <old> -> <new>` when an edit moved a file — followed by a summary line, `ok: n files`.
 
-## How to run it
+The behaviour contract mend implements lives in [`SPEC.md`](SPEC.md).
 
-Requires Node 22 or newer; standard library only, nothing to install.
+## Running it
+
+You need Node 22 or later. There is nothing to install; mend uses only the standard library.
 
 ```
 node main.ts [options] [PATCH]
 ```
 
-- `PATCH` is the patch file to apply; omit it or pass `-` to read the patch from standard input.
-- `--check` reports what would change without writing anything.
-- `--strict` matches patch lines exactly (tier 0 only).
-- `--format=unified|search-replace|v4a|json` forces a format instead of detecting it.
+`PATCH` names the file holding the patch; leave it out (or pass `-`) and the patch is read from standard input.
+The working directory is the root of the tree being patched.
 
-Exit code is 0 when every edit applied, 1 when one or more edits failed (nothing is written), and 2 for usage,
-missing-patch, format and parse errors.
+Options:
 
-## Files
+- `--check` — print the same report a real run would, but write nothing.
+- `--strict` — turn off the looser matching tiers; patch lines must match exactly.
+- `--format=unified`, `--format=search-replace`, `--format=v4a` or `--format=json` — read the patch in that
+  format instead of detecting it.
 
-- `main.ts` — the tool itself.
-- `runner.ts` — the kit's trial runner (unchanged); in a graded trial `main.ts` hands over to it.
+The exit code tells you how it went: 0 when the whole patch applied, 1 when at least one edit failed (with
+nothing written), and 2 for a usage error, an unreadable patch file, an undetectable format, or a patch that
+does not parse.
+
+## What's in the repo
+
+- `main.ts` — mend itself.
+- `runner.ts` — the trial runner supplied by the kit, unmodified; when a graded trial runs `main.ts`, control
+  passes to it.
 - `check.ts` — runs the kit's public practice set against `main.ts`:
 
   ```
   node check.ts <path-to-practice.json>
   ```
 
-- `SPEC.md` — the specification mend implements.
+- `SPEC.md` — the specification.
 - `LICENSE` — MIT.
 
 Built with an AI agent for make.fun — https://make.fun/?ref=kh6903y0&utm_source=github&utm_medium=readme&utm_campaign=hidden-spec-cli-01-run-20261122
