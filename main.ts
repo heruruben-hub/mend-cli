@@ -1,11 +1,11 @@
-// main.ts is mend, the CLI SPEC.md specifies (the kit's starting point for it was MIT). It does all of SPEC.md:
-// the command line, the output and exit codes, safe paths and format detection (sections 1 to 4), matching lines
-// at three tiers (section 5), unified diffs (section 6), SEARCH/REPLACE blocks (section 7), V4A patches
-// (section 8), JSON edits (section 9) and the all-or-nothing write (section 10). Node 22, the standard library
-// alone; run it as `node main.ts [options] [PATCH]`.
+// main.ts is mend, the patch tool SPEC.md defines. It covers the whole specification: invocation, output
+// and exit codes, safe paths and format detection (sections 1 to 4), the three tiers of line matching
+// (section 5), unified diffs (section 6), SEARCH/REPLACE blocks (section 7), V4A patches (section 8),
+// JSON edits (section 9) and the all-or-nothing write-back (section 10). It runs on Node 22 with the
+// standard library only: `node main.ts [options] [PATCH]`.
 //
-// In a trial the grader runs `node /bot/main.ts` with MAKEFUN_ENV_URL set, and then this file hands over to runner.ts
-// (the last lines below): keep that hand-over and runner.ts as they are, and write the CLI.
+// When the grader runs this file in a trial it sets MAKEFUN_ENV_URL, and the block at the very end then
+// hands over to runner.ts; that hand-over and runner.ts itself are the kit's and stay as they are.
 
 import { mkdirSync, readFileSync, rmSync, statSync, writeFileSync, writeSync } from 'node:fs';
 import { dirname } from 'node:path';
